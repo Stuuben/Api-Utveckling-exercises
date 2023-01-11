@@ -1,0 +1,23 @@
+type todo {
+  id: ID
+  name: String
+  description: String
+  isDone: Boolean
+  # ticket: [Ticket]
+}
+
+type DeletedResourceResponse {
+  deletedId: ID
+  success: Boolean
+}
+
+type Query {
+  getProjectById(projectId: ID!): todo
+  getAllProjects: [todo]
+}
+
+type Mutation {
+  createProject: todo
+  updateProject: todo
+  deleteProject: DeletedResourceResponse
+}
