@@ -5,17 +5,14 @@ const { GraphQLError, graphql } = require("graphql");
 const crypto = require("node:crypto");
 const { truncate } = require("fs");
 
-const projectDirectory = path.join(__dirname, "..", "data", "project");
+const todoDirectory = path.join(__dirname, "..", "data", "projects");
 
 exports.resolvers = {
   Query: {
     getTodoById: async (_, args) => {
       const todoId = args.projectId;
       // `../data/projects/${projectId}.json`
-      const todoFilePath = path.join(
-        __dirname,
-        `../data/projects/${todoId}.json`
-      );
+      const todoFilePath = path.join(todoDirectory, `${todoId}.json`);
 
       const todoExists = await fileExists(todoFilePath);
       if (!todoExists) return new GraphQLError("That project does not exist");
@@ -28,7 +25,7 @@ exports.resolvers = {
     },
     getAllProjects: async (_, args) => {
       // hämta mockdata
-      const todoDirectory = path.join(__dirname, "../data/projects");
+      /* const todoDirectory = path.join(__dirname, "../data/projects"); */
       const projects = await fsPromises.readdir(todoDirectory);
 
       const promises = [];
@@ -54,13 +51,7 @@ exports.resolvers = {
         description: args.description || "",
       };
 
-      let filePath = path.join(
-        __dirname,
-        "..",
-        "data",
-        "projects",
-        `${newTodo.id}.json`
-      );
+      let filePath = path.join(todoDirectory, `${newTodo.id}.json`);
 
       let idExists = true;
       while (idExists) {
@@ -68,13 +59,7 @@ exports.resolvers = {
         console.log(exists, newTodo.id);
         if (exists) {
           newTodo.id = crypto.randomUUID();
-          filePath = path.join(
-            __dirname,
-            "..",
-            "data",
-            "projects",
-            `${newTodo.id}.json`
-          );
+          filePath = path.join(todoDirectory, `${newTodo.id}.json`);
         }
         idExists = exists;
       }
@@ -93,17 +78,11 @@ exports.resolvers = {
 
       const { id, name, description } = args;
 
-      let filePath = path.join(
-        __dirname,
-        "..",
-        "data",
-        "projects",
-        `${id}.json`
-      );
+      let filePath = path.join(todoDirectory, `${id}.json`);
 
       // finns det projekt som de vill ändra
       // if (no) return Not Found Error
-      const exists = await fileExists(filePath);
+      const todoExists = await fileExists(filePath);
       if (!todoExists) return new GraphQLError("That project does not exist");
 
       // skapa updatedProject objekt
@@ -118,36 +97,23 @@ exports.resolvers = {
 
       return updatedTodo;
     },
-    deleteTodo: async (_, args, context) => {
-      // get project ut
-      const todoId = args.projectId;
+    deleteTodo: async (_, args) => {
+      // get project id
+      const todoId = args.todoId;
 
-      const filePath = path.join(
-        __dirname,
-        "..",
-        "data",
-        "projects",
-        `${todoId.id}.json`
-      );
-
-      // does this project exists?
-      // if no ( return error)
+      const filePath = path.join(todoDirectory, `${todoId}.json`);
+      // does this project exist?
+      // If no (return error)
       const todoExists = await fileExists(filePath);
       if (!todoExists) return new GraphQLError("That project does not exist");
 
       // delete file
-      try {
-        await fsPromises.unlink(filePath);
-      } catch (error) {
-        return {
-          deletedId: todoId,
-          success: false,
-        };
-      }
+
+      await fsPromises.unlink(filePath);
 
       return {
         deletedId: todoId,
-        success: true,
+        success: false,
       };
     },
   },
