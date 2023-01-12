@@ -1,4 +1,4 @@
-type todo {
+type Todo {
   id: ID
   name: String
   description: String
@@ -12,12 +12,12 @@ type DeletedResourceResponse {
 }
 
 type Query {
-  getProjectById(projectId: ID!): todo
-  getAllProjects: [todo]
+  getTodoById(todoId: ID!): Todo
+  getAllProjects: [Todo]
 }
 
 type Mutation {
-  createProject: todo
-  updateProject: todo
-  deleteProject: DeletedResourceResponse
+  createTodo(name: String!, description: String): Todo
+  updateTodo(id: ID!, name: String!, description: String!): Todo
+  deleteTodo(todoId: ID!): DeletedResourceResponse
 }
